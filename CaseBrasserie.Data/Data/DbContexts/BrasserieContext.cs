@@ -5,7 +5,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace CaseBrasserie.Infrastructure.Data.DbContexts
 {
-    public class BrasserieContext : DbContext
+    public class BrasserieContext : DbContext, IBrasserieContext
     {
         public BrasserieContext(DbContextOptions<BrasserieContext> options) : base(options) { }
         public DbSet<Brasserie> Brasseries { get; set; }

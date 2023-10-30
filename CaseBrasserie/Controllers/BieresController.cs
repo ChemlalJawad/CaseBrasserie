@@ -44,7 +44,7 @@ namespace CaseBrasserie.Web.Controllers
         {
             await _biereRepository.Delete(Id);
 
-            return Ok($"User avec {Id} a été correctement supprimer");
+            return Ok($"La biere avec comme id : {Id}, a été correctement supprimer");
         }
     }
 }

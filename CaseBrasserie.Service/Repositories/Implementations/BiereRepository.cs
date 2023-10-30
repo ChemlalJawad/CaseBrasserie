@@ -10,51 +10,42 @@ namespace CaseBrasserie.Application.Repositories.Implementations
     public class BiereRepository : IBiereRepository
     {
 
-        private readonly BrasserieContext _context;
+        private readonly IBrasserieContext _context;
 
-        public BiereRepository(BrasserieContext context)
+        public BiereRepository(IBrasserieContext context)
         {
             _context = context;
         }
 
         public async Task<Biere> Add(CreateBiereCommand command)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+
+            if (command == null) throw new CommandeVideException();
+            if (command.Nom == null) throw new BiereNomVideException();
+            if (command.Prix <= 0) throw new BierePrixException();
+
+            var brasserie = await _context.Brasseries.SingleOrDefaultAsync(b => b.Id == command.BrasserieId);
+            if (brasserie == null) { throw new BrasserieInexistantException(); }
+
+            var addBiere = new Biere
             {
-                if (command == null) throw new CommandeVideException();
-                if (command.Nom == null) throw new BiereNomVideException();
-                if (command.Prix <= 0) throw new BierePrixException();
+                Nom = command.Nom,
+                DegreAlcool = command.DegreAlcool,
+                Prix = command.Prix,
+                Brasserie = brasserie
+            };
 
-                var brasserie = await _context.Brasseries.SingleOrDefaultAsync(b => b.Id == command.BrasserieId);
-                if(brasserie == null) { throw new BrasserieInexistantException(); }
-                
-                var addBiere = new Biere 
-                { 
-                    Nom = command.Nom,
-                    DegreAlcool = command.DegreAlcool,
-                    Prix = command.Prix,
-                    Brasserie = brasserie
-                };
+            await _context.Bieres.AddAsync(addBiere);
+            await _context.SaveChangesAsync();
 
-                await _context.Bieres.AddAsync(addBiere);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return addBiere;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new TransactionAjoutError();
-            }
+            return addBiere;
         }
 
         public async Task<Biere> GetById(int id)
         {
             var biere = await _context.Bieres.FirstOrDefaultAsync(b => b.Id == id);
 
-            if(biere == null)
+            if (biere == null)
             {
                 throw new BiereInexistantException();
             }
@@ -64,27 +55,22 @@ namespace CaseBrasserie.Application.Repositories.Implementations
         public async Task<IEnumerable<Biere>> GetAll()
         {
             return await _context.Bieres
-                .Include(e=>e.Brasserie)
+                .Include(e => e.Brasserie)
                 .ThenInclude(e => e.Bieres)
-                .ThenInclude(e=> e.GrossistesBieres)
+                .ThenInclude(e => e.GrossistesBieres)
                 .ToListAsync();
         }
 
         public async Task Delete(int biereId)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var biereDelete = await _context.Bieres.SingleOrDefaultAsync(b => b.Id == biereId);
+            if (biereDelete == null)
             {
-                _context.Bieres.Remove(new Biere() { Id = biereId });
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
                 throw new BiereInexistantException();
             }
+            _context.Bieres.Remove(new Biere() { Id = biereId });
+            await _context.SaveChangesAsync();
+
         }
     }
 }

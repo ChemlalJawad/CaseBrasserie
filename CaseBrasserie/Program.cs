@@ -18,10 +18,11 @@ builder.Services.AddDbContext<BrasserieContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped<IBrasserieContext, BrasserieContext>();
 builder.Services.AddScoped<IBiereRepository, BiereRepository>();
 builder.Services.AddScoped<IBrasserieRepository, BrasserieRepository>();
 builder.Services.AddScoped<IGrossisteRepository, GrossisteRepository>();
+
 
 var app = builder.Build();
 
