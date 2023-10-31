@@ -48,7 +48,7 @@ namespace CaseBrasserie.Test
             };
 
             var grossisteBieres = new List<GrossisteBiere> { new GrossisteBiere {
-                BiereId = 3, 
+                BiereId = 3,
                 Biere = new Biere
                 {
                     Id = 3,
@@ -57,7 +57,7 @@ namespace CaseBrasserie.Test
                     Prix = 3.20M,
                     BrasserieId = 1
                 },
-                GrossisteId = 1, 
+                GrossisteId = 1,
                 Stock = 500 } };
             var grossistes = new List<Grossiste>
             {
@@ -274,8 +274,8 @@ namespace CaseBrasserie.Test
                 PrixTotal = 0,
                 Items = new List<ItemCommand>
                 {
-                    new ItemCommand { BiereId = 3, Quantite = 10 }, 
-                    new ItemCommand { BiereId = 3, Quantite = 10 } 
+                    new ItemCommand { BiereId = 3, Quantite = 10 },
+                    new ItemCommand { BiereId = 3, Quantite = 10 }
                 }
             };
 
@@ -286,7 +286,7 @@ namespace CaseBrasserie.Test
 
         [Fact]
         public void GetQuotation_InvalidCommand_CommandVideException()
-        { 
+        {
             // Arrange  
             var command = new QuotationCommand
             {
