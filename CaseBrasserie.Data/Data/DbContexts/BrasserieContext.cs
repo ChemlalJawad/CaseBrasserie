@@ -1,7 +1,6 @@
 ﻿
 using CaseBrasserie.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace CaseBrasserie.Infrastructure.Data.DbContexts
 {
@@ -32,6 +31,11 @@ namespace CaseBrasserie.Infrastructure.Data.DbContexts
 
             modelBuilder.Seed();
             base.OnModelCreating(modelBuilder);
+        }
+
+        public void Update<TEntity>(TEntity entity) where TEntity : class
+        {
+            Set<TEntity>().Update(entity);
         }
     }
 

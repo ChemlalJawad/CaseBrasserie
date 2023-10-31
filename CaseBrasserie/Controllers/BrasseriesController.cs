@@ -1,6 +1,5 @@
 ﻿using CaseBrasserie.Application.Repositories;
 using CaseBrasserie.Core.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CaseBrasserie.Web.Controllers
@@ -16,16 +15,18 @@ namespace CaseBrasserie.Web.Controllers
         }
 
         [HttpGet]
-        public  async Task<ActionResult<IEnumerable<Brasserie>>> GetAll() {
-            var result = await _brasserieRepository.GetAllBieres();
+        public ActionResult<IEnumerable<Brasserie>> GetAll()
+        {
+            var result = _brasserieRepository.GetAllBrasseries();
 
             return Ok(result);
         }
 
         [HttpGet("{Id}")]
-        public async Task<ActionResult<Brasserie>> Get([FromRoute] int Id) {
-            
-            var result = await _brasserieRepository.FindBrasserieById(Id);
+        public ActionResult<Brasserie> Get([FromRoute] int Id)
+        {
+
+            var result = _brasserieRepository.FindBrasserieById(Id);
 
             return Ok(result);
         }

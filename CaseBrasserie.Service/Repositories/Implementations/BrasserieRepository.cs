@@ -8,18 +8,18 @@ namespace CaseBrasserie.Application.Repositories.Implementations
     public class BrasserieRepository : IBrasserieRepository
     {
 
-        private readonly BrasserieContext _context;
-        public BrasserieRepository(BrasserieContext context)
+        private readonly IBrasserieContext _context;
+        public BrasserieRepository(IBrasserieContext context)
         {
             _context = context;
         }
 
-        public async Task<Brasserie> FindBrasserieById(int id)
+        public Brasserie FindBrasserieById(int id)
         {
-            var brasserie = await _context.Brasseries
+            var brasserie = _context.Brasseries
                 .Include(b => b.Bieres)
                 .ThenInclude(b => b.GrossistesBieres)
-                .SingleOrDefaultAsync(b => b.Id == id);
+                .SingleOrDefault(b => b.Id == id);
             if (brasserie == null)
             {
                 throw new BrasserieInexistantException();
@@ -28,13 +28,13 @@ namespace CaseBrasserie.Application.Repositories.Implementations
             return brasserie;
         }
 
-        public async Task<IEnumerable<Brasserie>> GetAllBieres()
+        public IEnumerable<Brasserie> GetAllBrasseries()
         {
-            var brasseries = await _context.Brasseries
+            var brasseries = _context.Brasseries
                 .Include(b => b.Bieres)
                 .ThenInclude(biere => biere.GrossistesBieres)
                 .ThenInclude(grossisteBiere => grossisteBiere.Grossiste)
-                .ToListAsync();
+                .ToList();
 
             return brasseries;
         }

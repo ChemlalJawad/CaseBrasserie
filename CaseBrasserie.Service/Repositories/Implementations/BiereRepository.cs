@@ -17,14 +17,14 @@ namespace CaseBrasserie.Application.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<Biere> Add(CreateBiereCommand command)
+        public Biere Add(CreateBiereCommand command)
         {
 
             if (command == null) throw new CommandeVideException();
             if (command.Nom == null) throw new BiereNomVideException();
             if (command.Prix <= 0) throw new BierePrixException();
 
-            var brasserie = await _context.Brasseries.SingleOrDefaultAsync(b => b.Id == command.BrasserieId);
+            var brasserie = _context.Brasseries.SingleOrDefault(b => b.Id == command.BrasserieId);
             if (brasserie == null) { throw new BrasserieInexistantException(); }
 
             var addBiere = new Biere
@@ -35,8 +35,8 @@ namespace CaseBrasserie.Application.Repositories.Implementations
                 Brasserie = brasserie
             };
 
-            await _context.Bieres.AddAsync(addBiere);
-            await _context.SaveChangesAsync();
+            _context.Bieres.Add(addBiere);
+            _context.SaveChanges();
 
             return addBiere;
         }
@@ -52,24 +52,26 @@ namespace CaseBrasserie.Application.Repositories.Implementations
             return biere;
         }
 
-        public async Task<IEnumerable<Biere>> GetAll()
+        public IEnumerable<Biere> GetAll()
         {
-            return await _context.Bieres
+            return _context.Bieres
                 .Include(e => e.Brasserie)
                 .ThenInclude(e => e.Bieres)
                 .ThenInclude(e => e.GrossistesBieres)
-                .ToListAsync();
+                .ToList();
         }
 
-        public async Task Delete(int biereId)
+        public Biere Delete(int biereId)
         {
-            var biereDelete = await _context.Bieres.SingleOrDefaultAsync(b => b.Id == biereId);
+            var biereDelete = _context.Bieres.SingleOrDefault(b => b.Id == biereId);
             if (biereDelete == null)
             {
                 throw new BiereInexistantException();
             }
-            _context.Bieres.Remove(new Biere() { Id = biereId });
-            await _context.SaveChangesAsync();
+            _context.Bieres.Remove(biereDelete);
+            _context.SaveChanges();
+
+            return biereDelete;
 
         }
     }

@@ -1,6 +1,4 @@
-﻿using CaseBrasserie.Application.Repositories.Commands.Grossistes;
-
-namespace CaseBrasserie.Web.DTOs
+﻿namespace CaseBrasserie.Web.DTOs
 {
     public class DevisDetails
     {

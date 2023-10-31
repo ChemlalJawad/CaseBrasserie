@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CaseBrasserie.Application.Exceptions
+﻿namespace CaseBrasserie.Application.Exceptions
 {
     [Serializable]
     public class BrasserieCustomError : Exception

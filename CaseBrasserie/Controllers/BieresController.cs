@@ -16,9 +16,9 @@ namespace CaseBrasserie.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Biere>>> GetAll()
+        public ActionResult<IEnumerable<Biere>> GetAll()
         {
-            var bieres = await _biereRepository.GetAll();
+            var bieres = _biereRepository.GetAll();
 
             return Ok(bieres);
         }
@@ -31,20 +31,20 @@ namespace CaseBrasserie.Web.Controllers
             return Ok(biere);
         }
         [HttpPost]
-        public async Task<ActionResult<Biere>> AddBiere(CreateBiereCommand command)
+        public ActionResult<Biere> AddBiere(CreateBiereCommand command)
         {
-            var biere = await _biereRepository.Add(command);
+            var biere = _biereRepository.Add(command);
 
             if (biere == null) { return NotFound(); }
 
             return Ok(biere);
         }
         [HttpDelete("{Id}")]
-        public async Task<ActionResult> Delete([FromRoute] int Id)
+        public ActionResult Delete([FromRoute] int Id)
         {
-            await _biereRepository.Delete(Id);
+            var biereDelete = _biereRepository.Delete(Id);
 
-            return Ok($"La biere avec comme id : {Id}, a été correctement supprimer");
+            return Ok(biereDelete);
         }
     }
 }

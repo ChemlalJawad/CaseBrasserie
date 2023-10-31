@@ -8,25 +8,25 @@ namespace CaseBrasserie.Application.Repositories.Implementations
 {
     public class GrossisteRepository : IGrossisteRepository
     {
-        private readonly BrasserieContext _context;
-        public GrossisteRepository(BrasserieContext context)
+        private readonly IBrasserieContext _context;
+        public GrossisteRepository(IBrasserieContext context)
         {
             _context = context;
         }
 
-        public async Task AddNewBiereToGrosssite(AddNewBiereCommand command)
+        public GrossisteBiere AddNewBiereToGrosssite(AddNewBiereCommand command)
         {
-            if(command == null) throw new CommandeVideException();
-            if(command.Stock < 0) throw new StockInsuffisantException();
+            if (command == null) throw new CommandeVideException();
+            if (command.Stock < 0) throw new StockInsuffisantException();
 
-            var biere = await _context.Bieres.FirstOrDefaultAsync(b => b.Id == command.BiereId);
+            var biere = _context.Bieres.FirstOrDefault(b => b.Id == command.BiereId);
             if (biere == null)
             {
                 throw new BiereInexistantException();
             }
-            var grossiste = await _context.Grossistes
+            var grossiste = _context.Grossistes
                 .Include(e => e.GrossistesBieres)
-                .FirstOrDefaultAsync(b => b.Id == command.GrossisteId);
+                .FirstOrDefault(b => b.Id == command.GrossisteId);
             if (grossiste == null)
             {
                 throw new GrossisteInexistantException();
@@ -36,29 +36,49 @@ namespace CaseBrasserie.Application.Repositories.Implementations
                 throw new BiereDejaVendueParGrossisteException();
             }
 
-            var addBiere = new GrossisteBiere()
+            var addBiereToGrossiste = new GrossisteBiere()
             {
                 GrossisteId = command.GrossisteId,
                 BiereId = command.BiereId,
                 Stock = command.Stock
             };
 
-            await _context.GrossistesBieres.AddAsync(addBiere);
-            await _context.SaveChangesAsync();
+            _context.GrossistesBieres.Add(addBiereToGrossiste);
+            _context.SaveChanges();
 
+            return addBiereToGrossiste;
         }
 
-        public async Task<decimal> GetQuotation(QuotationCommand command)
+        /*
+        public GrossisteBiere GetGrossisteBiereById(int GrossisteId, int BiereId)
+        {
+            var grossisteBiere = _context.GrossistesBieres
+                .Include(e => e.Grossiste)
+                .ThenInclude(e => e.GrossistesBieres)
+                .ThenInclude(e => e.Biere)
+                .SingleOrDefault(e => e.BiereId == BiereId && e.GrossisteId == GrossisteId);
+
+            if (grossisteBiere == null)
+            {
+                throw new GrossisteInexistantException();
+            }
+
+            return grossisteBiere;
+        }
+        */
+
+        public decimal GetQuotation(QuotationCommand command)
         {
             if (command.Items == null || command.Items?.Count() < 1)
                 throw new CommandeVideException();
 
-            var grossiste = await _context.Grossistes
+            var grossiste = _context.Grossistes
                                     .Include(e => e.GrossistesBieres)
                                     .ThenInclude(e => e.Biere)
-                                    .SingleOrDefaultAsync(e => e.Id == command.GrossisteId);
+                                    .FirstOrDefault(e => e.Id == command.GrossisteId);
             if (grossiste == null)
                 throw new GrossisteInexistantException();
+
 
 
             if (command.Items?.GroupBy(e => e.BiereId).ToList().Count() < command.Items?.Count())
@@ -71,7 +91,7 @@ namespace CaseBrasserie.Application.Repositories.Implementations
 
             foreach (var item in command.Items)
             {
-                var gb = grossiste.GrossistesBieres.SingleOrDefault(gb => gb.BiereId == item.BiereId);
+                var gb = grossiste.GrossistesBieres.FirstOrDefault(gb => gb.BiereId == item.BiereId);
 
                 if (gb == null)
                 {
@@ -105,27 +125,31 @@ namespace CaseBrasserie.Application.Repositories.Implementations
             return prixTotal;
         }
 
-        public async Task<IEnumerable<GrossisteBiere>> GetAll()
+        /*
+        public IEnumerable<GrossisteBiere> GetAll()
         {
-            return await _context.GrossistesBieres
+            return _context.GrossistesBieres
                 .Include(e => e.Grossiste)
                 .ThenInclude(e => e.GrossistesBieres)
                 .ThenInclude(e => e.Biere)
-                .ToListAsync();
+                .ToList();
         }
+        */
 
-        public async Task UpdateGrossisteBiere(UpdateStockCommand command)
+        public GrossisteBiere UpdateGrossisteBiere(UpdateStockCommand command)
         {
             if (command == null) { throw new CommandeVideException(); }
 
-            var grossisteBiere = await _context.GrossistesBieres.SingleOrDefaultAsync(gb => gb.GrossisteId == command.BiereId && gb.BiereId == command.GrossisteId);
+            var grossisteBiere = _context.GrossistesBieres.SingleOrDefault(gb => gb.GrossisteId == command.GrossisteId && gb.BiereId == command.BiereId);
             if (grossisteBiere == null) { throw new GrossisteBiereException(); }
             if (command.Stock < 0) { throw new StockModificationException(); }
 
             grossisteBiere.Stock = command.Stock;
 
             _context.Update(grossisteBiere);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+
+            return grossisteBiere;
         }
     }
 }
