@@ -49,27 +49,9 @@ namespace CaseBrasserie.Application.Repositories.Implementations
             return addBiereToGrossiste;
         }
 
-        /*
-        public GrossisteBiere GetGrossisteBiereById(int GrossisteId, int BiereId)
-        {
-            var grossisteBiere = _context.GrossistesBieres
-                .Include(e => e.Grossiste)
-                .ThenInclude(e => e.GrossistesBieres)
-                .ThenInclude(e => e.Biere)
-                .SingleOrDefault(e => e.BiereId == BiereId && e.GrossisteId == GrossisteId);
-
-            if (grossisteBiere == null)
-            {
-                throw new GrossisteInexistantException();
-            }
-
-            return grossisteBiere;
-        }
-        */
-
         public decimal GetQuotation(QuotationCommand command)
         {
-            if (command.Items == null || command.Items?.Count() < 1)
+            if (command.Items == null || command.Items?.Count() < 1 || command == null)
                 throw new CommandeVideException();
 
             var grossiste = _context.Grossistes
@@ -124,17 +106,6 @@ namespace CaseBrasserie.Application.Repositories.Implementations
 
             return prixTotal;
         }
-
-        /*
-        public IEnumerable<GrossisteBiere> GetAll()
-        {
-            return _context.GrossistesBieres
-                .Include(e => e.Grossiste)
-                .ThenInclude(e => e.GrossistesBieres)
-                .ThenInclude(e => e.Biere)
-                .ToList();
-        }
-        */
 
         public GrossisteBiere UpdateGrossisteBiere(UpdateStockCommand command)
         {

@@ -47,7 +47,18 @@ namespace CaseBrasserie.Test
                 },
             };
 
-            var grossisteBieres = new List<GrossisteBiere> { new GrossisteBiere { BiereId = 3, GrossisteId = 1, Stock = 500 } };
+            var grossisteBieres = new List<GrossisteBiere> { new GrossisteBiere {
+                BiereId = 3, 
+                Biere = new Biere
+                {
+                    Id = 3,
+                    Nom = "Biere Test",
+                    DegreAlcool = 1.6F,
+                    Prix = 3.20M,
+                    BrasserieId = 1
+                },
+                GrossisteId = 1, 
+                Stock = 500 } };
             var grossistes = new List<Grossiste>
             {
                 new Grossiste { Id = 1, Nom = "Test Grossiste 1", GrossistesBieres = grossisteBieres  },
@@ -217,6 +228,7 @@ namespace CaseBrasserie.Test
         public void GetQuotation_ValidCommand_ReturnsExpectedQuotation()
         {
             // Arrange  
+            var expect = 32;
             var command = new QuotationCommand
             {
                 GrossisteId = 1,
@@ -225,11 +237,106 @@ namespace CaseBrasserie.Test
             };
 
             // Act
-            _mockDbContext(dbMemory.Object);
             var result = _grossisteRepository.GetQuotation(command);
 
             // Assert
-            Assert.Equal(500, result);
+            Assert.Equal(expect, result);
+
+        }
+
+        [Fact]
+        public void GetQuotation_InvalidCommand_GrossisteInexistantException()
+        {
+            // Arrange  
+            var command = new QuotationCommand
+            {
+                GrossisteId = 100,
+                PrixTotal = 0,
+                Items = new List<ItemCommand>
+                {
+                    new ItemCommand { BiereId = 3, Quantite = 10 },
+                    new ItemCommand { BiereId = 3, Quantite = 10 }
+                }
+            };
+
+            // Act & Assert
+            Assert.Throws<GrossisteInexistantException>(() => _grossisteRepository.GetQuotation(command));
+
+        }
+
+        [Fact]
+        public void GetQuotation_InvalidCommand_DoublonCommandeException()
+        {
+            // Arrange  
+            var command = new QuotationCommand
+            {
+                GrossisteId = 1,
+                PrixTotal = 0,
+                Items = new List<ItemCommand>
+                {
+                    new ItemCommand { BiereId = 3, Quantite = 10 }, 
+                    new ItemCommand { BiereId = 3, Quantite = 10 } 
+                }
+            };
+
+            // Act & Assert
+            Assert.Throws<DoublonCommandeException>(() => _grossisteRepository.GetQuotation(command));
+
+        }
+
+        [Fact]
+        public void GetQuotation_InvalidCommand_CommandVideException()
+        { 
+            // Arrange  
+            var command = new QuotationCommand
+            {
+                GrossisteId = 1,
+                PrixTotal = 0,
+                Items = new List<ItemCommand>
+                {
+                }
+            };
+
+            // Act & Assert
+            Assert.Throws<CommandeVideException>(() => _grossisteRepository.GetQuotation(command));
+
+        }
+
+        [Fact]
+        public void GetQuotation_InvalidCommand_BiereVenduParGrossisteException()
+        {
+            // Arrange  
+            var command = new QuotationCommand
+            {
+                GrossisteId = 1,
+                PrixTotal = 0,
+                Items = new List<ItemCommand>
+                {
+                    new ItemCommand { BiereId = 1, Quantite = 10 }
+                }
+            };
+
+            // Act & Assert
+            Assert.Throws<BiereNonVendueParGrossisteException>(() => _grossisteRepository.GetQuotation(command));
+
+        }
+
+        [Fact]
+        public void GetQuotation_InvalidCommand_StockInsuffisantException()
+        {
+            // Arrange  
+            var command = new QuotationCommand
+            {
+                GrossisteId = 1,
+                PrixTotal = 0,
+                Items = new List<ItemCommand>
+                {
+                    new ItemCommand { BiereId = 3, Quantite = 10000 }
+                }
+            };
+
+            // Act & Assert
+            Assert.Throws<StockInsuffisantException>(() => _grossisteRepository.GetQuotation(command));
 
         }
 
